@@ -17,8 +17,8 @@ class _MessageScreenState extends State<MessageScreen> {
   @override
   void initState() {
     super.initState();
-    _manager = Provider.of<MQTTManager>(context, listen: false);
-    _configureAndConnect();
+    // _manager = Provider.of<MQTTManager>(context, listen: false);
+    // _configureAndConnect();
   }
 
   @override
@@ -113,9 +113,9 @@ class _MessageScreenState extends State<MessageScreen> {
     _manager.publish();
   }
 
-  void _configureAndConnect() {
-    _manager.initializeMQTTClient(
-        host: "broker.hivemq.com", identifier: "osPrefix");
-    _manager.connect();
-  }
+  // void _configureAndConnect() {
+  //   _manager.initializeMQTTClient(
+  //       host: "broker.hivemq.com", identifier: "osPrefix");
+  //   _manager.connect();
+  // }
 }

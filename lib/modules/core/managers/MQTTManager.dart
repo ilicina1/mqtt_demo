@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
+import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
 
 class MQTTManager extends ChangeNotifier {
   // Private instance of client
   MQTTAppState _currentState = MQTTAppState();
-  MqttServerClient? _client;
+  MqttBrowserClient? _client;
   late String _identifier;
   String? _host;
   String _topic = "sonoff";
@@ -19,12 +19,16 @@ class MQTTManager extends ChangeNotifier {
     // Save the values
     _identifier = identifier;
     _host = host;
-    _client = MqttServerClient(_host!, _identifier);
-    _client!.port = 1883;
+
+    _client = MqttBrowserClient("ws://" + host, _identifier);
+
+    _client!.port = 8000;
     _client!.keepAlivePeriod = 20;
-    _client!.secure = false;
+    // _client!.secure = false;
     _client!.onDisconnected = onDisconnected;
     _client!.logging(on: true);
+    _client!.websocketProtocols = ['mqtt'];
+    _client!.server += "/mqtt";
 
     /// Add the successful connection callback
     _client!.onConnected = onConnected;
