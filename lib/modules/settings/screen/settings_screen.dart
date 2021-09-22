@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
@@ -135,12 +133,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _configureAndConnect() {
-    // String osPrefix = 'Flutter_iOS';
-    // if (Platform.isAndroid) {
-    //   osPrefix = 'Flutter_Android';
-    // }
-    _manager.initializeMQTTClient(
-        host: _hostTextController.text, identifier: "osPrefix");
+    if (kIsWeb) {
+      _manager.initializeMQTTClient(
+          host: _hostTextController.text, identifier: "web");
+    } else {
+      _manager.initializeMQTTClient(
+          host: _hostTextController.text, identifier: "mobileApp");
+    }
     _manager.connect();
   }
 

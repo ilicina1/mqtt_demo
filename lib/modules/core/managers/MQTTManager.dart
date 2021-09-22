@@ -19,6 +19,7 @@ class MQTTManager extends ChangeNotifier {
     // Save the values
     _identifier = identifier;
     _host = host;
+
     _client = MqttServerClient(_host!, _identifier);
     _client!.port = 1883;
     _client!.keepAlivePeriod = 20;
