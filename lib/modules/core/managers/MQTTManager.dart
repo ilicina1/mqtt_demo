@@ -20,7 +20,7 @@ class MQTTManager extends ChangeNotifier {
     _identifier = identifier;
     _host = host;
 
-    _client = MqttBrowserClient("wss://" + host, _identifier);
+    _client = MqttBrowserClient("ws://" + host, _identifier);
 
     _client!.port = 8000;
     _client!.keepAlivePeriod = 20;
