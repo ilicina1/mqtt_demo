@@ -56,12 +56,6 @@ class MQTTManager extends ChangeNotifier {
       await _client!.connect();
       _client!.subscribe("unifai/light/event/state", MqttQos.atLeastOnce);
 
-      // on initialization send message to getstate and receive response
-      final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
-      builder.addString("0");
-      _client!.publishMessage(
-          "unifai/light/event/getstate", MqttQos.exactlyOnce, builder.payload!);
-
       // listen to unifai/light/event/state and changing state depending on message
       _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
         final recMess = c[0].payload as MqttPublishMessage;
@@ -73,6 +67,12 @@ class MQTTManager extends ChangeNotifier {
           isTurnedOn = false;
         print('Received message:$payload  --');
       });
+
+      // on initialization send message to getstate and receive response
+      final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+      builder.addString("0");
+      _client!.publishMessage(
+          "unifai/light/event/getstate", MqttQos.exactlyOnce, builder.payload!);
     } on Exception catch (e) {
       print('EXAMPLE::client exception - $e');
       disconnect();
