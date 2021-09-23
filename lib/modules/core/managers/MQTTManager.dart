@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
 import 'package:mqtt_client/mqtt_client.dart';
@@ -20,7 +22,7 @@ class MQTTManager extends ChangeNotifier {
     _identifier = identifier;
     _host = host;
 
-    _client = MqttServerClient(_host!, _identifier);
+    _client = MqttServerClient(_host!, generateRandomString(10));
     _client!.port = 1883;
     _client!.keepAlivePeriod = 20;
     _client!.secure = false;
@@ -166,5 +168,11 @@ class MQTTManager extends ChangeNotifier {
   void updateState() {
     //controller.add(_currentState);
     notifyListeners();
+  }
+
+  String generateRandomString(int len) {
+    var r = Random();
+    return String.fromCharCodes(
+        List.generate(len, (index) => r.nextInt(33) + 89));
   }
 }
