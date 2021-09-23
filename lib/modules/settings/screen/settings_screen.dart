@@ -4,6 +4,7 @@ import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
 import 'package:fluttermqttnew/modules/core/widgets/status_bar.dart';
 import 'package:fluttermqttnew/modules/helpers/status_info_message_utils.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SettingsScreen extends StatefulWidget {
   @override
