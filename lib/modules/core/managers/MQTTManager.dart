@@ -21,8 +21,8 @@ class MQTTManager extends ChangeNotifier {
     // Save the values
     _identifier = identifier;
     _host = host;
-
-    _client = MqttServerClient(_host!, generateRandomString(10));
+    var idRandom = generateRandomString(10);
+    _client = MqttServerClient(_host!, idRandom);
     _client!.port = 1883;
     _client!.keepAlivePeriod = 20;
     _client!.secure = false;
@@ -35,7 +35,7 @@ class MQTTManager extends ChangeNotifier {
     _client!.onUnsubscribed = onUnsubscribed;
 
     final MqttConnectMessage connMess = MqttConnectMessage()
-        .withClientIdentifier(_identifier)
+        .withClientIdentifier(idRandom)
         .withWillTopic(
             'willtopic') // If you set this you must set a will message
         .withWillMessage('My Will message')
