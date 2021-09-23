@@ -137,6 +137,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     // if (Platform.isAndroid) {
     //   osPrefix = 'Flutter_Android';
     // }
+
     _manager.initializeMQTTClient(
         host: _hostTextController.text, identifier: "osPrefix");
     _manager.connect();
