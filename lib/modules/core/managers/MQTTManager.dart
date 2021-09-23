@@ -22,7 +22,11 @@ class MQTTManager extends ChangeNotifier {
     _identifier = identifier;
     _host = host;
 
-    _client = MqttBrowserClient("ws://" + host, generateRandomString(10));
+    var idRandom = generateRandomString(10);
+
+    print("random identifier $idRandom");
+
+    _client = MqttBrowserClient("ws://" + host, idRandom);
 
     _client!.port = 8000;
     _client!.keepAlivePeriod = 20;
@@ -38,7 +42,7 @@ class MQTTManager extends ChangeNotifier {
     _client!.onUnsubscribed = onUnsubscribed;
 
     final MqttConnectMessage connMess = MqttConnectMessage()
-        .withClientIdentifier(_identifier)
+        .withClientIdentifier(idRandom)
         .withWillTopic(
             'willtopic') // If you set this you must set a will message
         .withWillMessage('My Will message')
