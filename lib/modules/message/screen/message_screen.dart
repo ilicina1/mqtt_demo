@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
