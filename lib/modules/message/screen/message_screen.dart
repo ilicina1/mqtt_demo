@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
+import 'package:fluttermqttnew/modules/core/widgets/status_bar.dart';
 import 'package:fluttermqttnew/modules/helpers/screen_route.dart';
+import 'package:fluttermqttnew/modules/helpers/status_info_message_utils.dart';
 import 'package:provider/provider.dart';
 
 class MessageScreen extends StatefulWidget {
@@ -15,6 +18,10 @@ class _MessageScreenState extends State<MessageScreen> {
   @override
   void initState() {
     super.initState();
+    SchedulerBinding.instance!.addPostFrameCallback((_) {
+      _configureAndConnect();
+      print("SchedulerBinding");
+    });
     // _manager = Provider.of<MQTTManager>(context, listen: false);
     // _configureAndConnect();
   }
@@ -38,32 +45,38 @@ class _MessageScreenState extends State<MessageScreen> {
           ),
           backgroundColor: Colors.white,
           elevation: 0.0,
-          actions: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(right: 15.0),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed(SETTINGS_ROUTE);
-                },
-                child: Icon(
-                  Icons.settings,
-                  color: Color(0xff01579B),
-                  size: 26.0,
-                ),
-              ),
-            )
-          ]),
+          // manual connection
+          // actions: <Widget>[
+          //   Padding(
+          //     padding: const EdgeInsets.only(right: 15.0),
+          //     child: GestureDetector(
+          //       onTap: () {
+          //         Navigator.of(context).pushNamed(SETTINGS_ROUTE);
+          //       },
+          //       child: Icon(
+          //         Icons.settings,
+          //         color: Color(0xff01579B),
+          //         size: 26.0,
+          //       ),
+          //     ),
+          //   )
+          // ]
+          ),
       body: SafeArea(
         child: Container(
           alignment: Alignment.center,
           height: MediaQuery.of(context).size.height,
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // StatusBar(
-              //     statusMessage: prepareStateMessageFrom(
-              //         _manager.currentState.getAppConnectionState)),
-              _buildSendButtonFrom(_manager.currentState.getAppConnectionState)
+              Container(
+                child: Text(''),
+              ),
+             
+              _buildSendButtonFrom(_manager.currentState.getAppConnectionState),
+              StatusBar(
+            statusMessage: prepareStateMessageFrom(
+                _manager.currentState.getAppConnectionState)),
             ],
           ),
         ),
@@ -91,18 +104,6 @@ class _MessageScreenState extends State<MessageScreen> {
             ),
           ),
         );
-        //return RaisedButton(
-        //   color: Colors.green,
-        //   disabledColor: Colors.grey,
-        //   textColor: Colors.white,
-        //   disabledTextColor: Colors.black38,
-        //   child: Icon(
-        //     Icons.power_settings_new,
-        //   ),
-        //   onPressed: () {
-        //     _publishMessage();
-        //   },
-        // );
       },
     );
   }
@@ -111,9 +112,9 @@ class _MessageScreenState extends State<MessageScreen> {
     _manager.publish();
   }
 
-  // void _configureAndConnect() {
-  //   _manager.initializeMQTTClient(
-  //       host: "broker.hivemq.com", identifier: "osPrefix");
-  //   _manager.connect();
-  // }
+  void _configureAndConnect() {
+    _manager.initializeMQTTClient(host: "broker.hivemq.com");
+
+    _manager.connect();
+  }
 }

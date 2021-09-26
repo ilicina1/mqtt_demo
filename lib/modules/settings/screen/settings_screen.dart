@@ -134,13 +134,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _configureAndConnect() {
-    if (kIsWeb) {
-      _manager.initializeMQTTClient(
-          host: _hostTextController.text, identifier: "web");
-    } else {
-      _manager.initializeMQTTClient(
-          host: _hostTextController.text, identifier: "mobileApp");
-    }
+    _manager.initializeMQTTClient(host: _hostTextController.text);
+
     _manager.connect();
   }
 

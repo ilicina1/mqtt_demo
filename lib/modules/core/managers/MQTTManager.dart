@@ -16,15 +16,12 @@ class MQTTManager extends ChangeNotifier {
 
   void initializeMQTTClient({
     required String host,
-    required String identifier,
   }) {
-    // Save the values
-    _identifier = identifier;
     _host = host;
     var idRandom = generateRandomString(10);
     _client = MqttServerClient(_host!, idRandom);
     _client!.port = 1883;
-    _client!.keepAlivePeriod = 20;
+    // _client!.keepAlivePeriod = 1;
     _client!.secure = false;
     _client!.onDisconnected = onDisconnected;
     _client!.logging(on: true);
@@ -102,14 +99,6 @@ class MQTTManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// The subscribed callback
-  // void onSubscribed(String topic) {
-  //   print('EXAMPLE::Subscription confirmed for topic $topic');
-  //   _currentState
-  //       .setAppConnectionState(MQTTAppConnectionState.connectedSubscribed);
-  //   updateState();
-  // }
-
   void onUnsubscribed(String? topic) {
     print('EXAMPLE::onUnsubscribed confirmed for topic $topic');
     _currentState.clearText();
@@ -148,22 +137,6 @@ class MQTTManager extends ChangeNotifier {
     print(
         'EXAMPLE::OnConnected client callback - Client connection was sucessful');
   }
-
-  // void subScribeTo(String topic) {
-  //   // Save topic for future use
-  //   _topic = topic;
-  //   _client!.subscribe(topic, MqttQos.atLeastOnce);
-  // }
-
-  /// Unsubscribe from a topic
-  // void unSubscribe(String topic) {
-  //   _client!.unsubscribe(topic);
-  // }
-
-  /// Unsubscribe from a topic
-  // void unSubscribeFromCurrentTopic() {
-  //   _client!.unsubscribe(_topic);
-  // }
 
   void updateState() {
     //controller.add(_currentState);
