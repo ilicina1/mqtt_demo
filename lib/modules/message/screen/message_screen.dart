@@ -69,14 +69,16 @@ class _MessageScreenState extends State<MessageScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                child: Text(''),
-              ),
-             
-              _buildSendButtonFrom(_manager.currentState.getAppConnectionState),
               StatusBar(
             statusMessage: prepareStateMessageFrom(
                 _manager.currentState.getAppConnectionState)),
+              
+             
+              _buildSendButtonFrom(_manager.currentState.getAppConnectionState),
+              Container(
+                child: Text(''),
+              ),
+           
             ],
           ),
         ),
