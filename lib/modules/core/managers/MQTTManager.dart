@@ -9,17 +9,14 @@ class MQTTManager extends ChangeNotifier {
   // Private instance of client
   MQTTAppState _currentState = MQTTAppState();
   MqttBrowserClient? _client;
-  late String _identifier;
   String? _host;
   String _topic = "sonoff";
   bool isTurnedOn = false;
 
   void initializeMQTTClient({
     required String host,
-    required String identifier,
   }) {
     // Save the values
-    _identifier = identifier;
     _host = host;
 
     var idRandom = generateRandomString(10);
