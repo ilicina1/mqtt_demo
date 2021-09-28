@@ -66,8 +66,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
       padding: const EdgeInsets.all(20.0),
       child: Column(
         children: <Widget>[
-          _buildTextFieldWith(_hostTextController, 'Enter broker address',
-              currentAppState.getAppConnectionState),
+          // _buildTextFieldWith(_hostTextController, 'Enter broker address',
+          //     currentAppState.getAppConnectionState),
           const SizedBox(height: 10),
           _buildConnecteButtonFrom(currentAppState.getAppConnectionState)
         ],
@@ -112,29 +112,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : null, //
           ),
         ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: RaisedButton(
-            color: Color(0xffC1292E),
-            child: const Text(
-              'Disconnect',
-              style: TextStyle(
-                color: Colors.white,
-                fontFamily: "Poppins",
-              ),
-            ),
-            onPressed: state != MQTTAppConnectionState.disconnected
-                ? _disconnect
-                : null, //
-          ),
-        ),
+        // const SizedBox(width: 10),
+        // Expanded(
+        //   child: RaisedButton(
+        //     color: Color(0xffC1292E),
+        //     child: const Text(
+        //       'Disconnect',
+        //       style: TextStyle(
+        //         color: Colors.white,
+        //         fontFamily: "Poppins",
+        //       ),
+        //     ),
+        //     onPressed: state != MQTTAppConnectionState.disconnected
+        //         ? _disconnect
+        //         : null, //
+        //   ),
+        // ),
       ],
     );
   }
 
   void _configureAndConnect() {
     _manager.initializeMQTTClient(
-        host: _hostTextController.text);
+        host: "broker.hivemq.com");
     _manager.connect();
   }
 

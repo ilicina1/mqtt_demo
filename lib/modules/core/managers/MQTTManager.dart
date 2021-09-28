@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -26,7 +27,7 @@ class MQTTManager extends ChangeNotifier {
     _client = MqttBrowserClient("ws://" + host, idRandom);
 
     _client!.port = 8000;
-    _client!.keepAlivePeriod = 20;
+    // _client!.keepAlivePeriod = 1;
     // _client!.secure = false;
     _client!.onDisconnected = onDisconnected;
     _client!.logging(on: true);
@@ -79,6 +80,10 @@ class MQTTManager extends ChangeNotifier {
           isTurnedOn = false;
         print('Received message:$payload  --');
       });
+      new Timer.periodic(
+          const Duration(minutes: 10),
+          (Timer t) => _client!.publishMessage(
+              "test/test", MqttQos.exactlyOnce, builder.payload!));
     } on Exception catch (e) {
       print('EXAMPLE::client exception - $e');
       disconnect();
@@ -131,6 +136,7 @@ class MQTTManager extends ChangeNotifier {
     }
     _currentState.clearText();
     _currentState.setAppConnectionState(MQTTAppConnectionState.disconnected);
+
     updateState();
   }
 
