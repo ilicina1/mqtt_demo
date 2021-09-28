@@ -78,25 +78,31 @@ class MQTTManager extends ChangeNotifier {
     }
   }
 
+  void onVoiceCommand(String value) {
+    if (value.toLowerCase().contains("lights on")) publish("1");
+    if (value.toLowerCase().contains("lights off")) publish("0");
+  }
+
   void disconnect() {
     print('Disconnected');
     _client!.disconnect();
   }
 
-  void publish() {
+  void publish([value]) {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     String message = "";
     if (isTurnedOn)
       message = "0";
     else
       message = "1";
-    builder.addString(message);
+      print("value value: $value");
+    builder.addString(value == null ? message : value);
     _client!.publishMessage(_topic, MqttQos.exactlyOnce, builder.payload!);
     _client!.publishMessage("unifai/light/event/changestate",
         MqttQos.exactlyOnce, builder.payload!);
     isTurnedOn = !isTurnedOn;
 
-    notifyListeners();
+    // notifyListeners();
   }
 
   void onUnsubscribed(String? topic) {

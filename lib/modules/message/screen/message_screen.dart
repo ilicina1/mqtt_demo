@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
+import 'package:fluttermqttnew/modules/core/managers/speechToTextManager.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
 import 'package:fluttermqttnew/modules/core/widgets/status_bar.dart';
 import 'package:fluttermqttnew/modules/helpers/screen_route.dart';
@@ -14,12 +15,14 @@ class MessageScreen extends StatefulWidget {
 
 class _MessageScreenState extends State<MessageScreen> {
   late MQTTManager _manager;
+  late SpeechToTextManager _speechManager;
 
   @override
   void initState() {
     super.initState();
     SchedulerBinding.instance!.addPostFrameCallback((_) {
       _configureAndConnect();
+      _initializeSpeechRecognition();
       print("SchedulerBinding");
     });
     // _manager = Provider.of<MQTTManager>(context, listen: false);
@@ -29,39 +32,45 @@ class _MessageScreenState extends State<MessageScreen> {
   @override
   Widget build(BuildContext context) {
     _manager = Provider.of<MQTTManager>(context);
+    _speechManager = Provider.of<SpeechToTextManager>(context);
+    print("REBUILD WIDGET ${_speechManager.lastWords}");
+    if (_speechManager.lastWords.length > 0) {
+      _manager.onVoiceCommand(_speechManager.lastWords);
+      _speechManager.lastWords = "";
+    }
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-          title: const Text(
-            'Unifai',
-            style: TextStyle(
-              fontSize: 20,
-              fontFamily: "Poppins",
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.15,
-              color: Color(0xff01579B),
-            ),
+        title: const Text(
+          'Unifai',
+          style: TextStyle(
+            fontSize: 20,
+            fontFamily: "Poppins",
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.15,
+            color: Color(0xff01579B),
           ),
-          backgroundColor: Colors.white,
-          elevation: 0.0,
-          // manual connection
-          // actions: <Widget>[
-          //   Padding(
-          //     padding: const EdgeInsets.only(right: 15.0),
-          //     child: GestureDetector(
-          //       onTap: () {
-          //         Navigator.of(context).pushNamed(SETTINGS_ROUTE);
-          //       },
-          //       child: Icon(
-          //         Icons.settings,
-          //         color: Color(0xff01579B),
-          //         size: 26.0,
-          //       ),
-          //     ),
-          //   )
-          // ]
-          ),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0.0,
+        // manual connection
+        // actions: <Widget>[
+        //   Padding(
+        //     padding: const EdgeInsets.only(right: 15.0),
+        //     child: GestureDetector(
+        //       onTap: () {
+        //         Navigator.of(context).pushNamed(SETTINGS_ROUTE);
+        //       },
+        //       child: Icon(
+        //         Icons.settings,
+        //         color: Color(0xff01579B),
+        //         size: 26.0,
+        //       ),
+        //     ),
+        //   )
+        // ]
+      ),
       body: SafeArea(
         child: Container(
           alignment: Alignment.center,
@@ -70,15 +79,12 @@ class _MessageScreenState extends State<MessageScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               StatusBar(
-            statusMessage: prepareStateMessageFrom(
-                _manager.currentState.getAppConnectionState)),
-              
-             
+                  statusMessage: prepareStateMessageFrom(
+                      _manager.currentState.getAppConnectionState)),
               _buildSendButtonFrom(_manager.currentState.getAppConnectionState),
               Container(
                 child: Text(''),
               ),
-           
             ],
           ),
         ),
@@ -118,5 +124,9 @@ class _MessageScreenState extends State<MessageScreen> {
     _manager.initializeMQTTClient(host: "broker.hivemq.com");
 
     _manager.connect();
+  }
+
+  void _initializeSpeechRecognition() {
+    _speechManager.initSpeech();
   }
 }
