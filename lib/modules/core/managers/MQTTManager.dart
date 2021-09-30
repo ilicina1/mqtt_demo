@@ -74,6 +74,7 @@ class MQTTManager extends ChangeNotifier {
       _client!.publishMessage(
           "unifai/light/event/getstate", MqttQos.exactlyOnce, builder.payload!);
 
+
       new Timer.periodic(
           const Duration(minutes: 10),
           (Timer t) => _client!.publishMessage(

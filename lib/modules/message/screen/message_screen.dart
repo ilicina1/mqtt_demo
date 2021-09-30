@@ -55,21 +55,21 @@ class _MessageScreenState extends State<MessageScreen> {
         backgroundColor: Colors.white,
         elevation: 0.0,
         // manual connection
-        // actions: <Widget>[
-        //   Padding(
-        //     padding: const EdgeInsets.only(right: 15.0),
-        //     child: GestureDetector(
-        //       onTap: () {
-        //         Navigator.of(context).pushNamed(SETTINGS_ROUTE);
-        //       },
-        //       child: Icon(
-        //         Icons.settings,
-        //         color: Color(0xff01579B),
-        //         size: 26.0,
-        //       ),
-        //     ),
-        //   )
-        // ]
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 15.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).pushNamed(SETTINGS_ROUTE);
+              },
+              child: Icon(
+                Icons.settings,
+                color: Color(0xff01579B),
+                size: 26.0,
+              ),
+            ),
+          )
+        ]
       ),
       body: SafeArea(
         child: Container(
