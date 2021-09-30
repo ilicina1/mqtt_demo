@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -72,6 +73,12 @@ class MQTTManager extends ChangeNotifier {
       builder.addString("0");
       _client!.publishMessage(
           "unifai/light/event/getstate", MqttQos.exactlyOnce, builder.payload!);
+
+      new Timer.periodic(
+          const Duration(minutes: 10),
+          (Timer t) => _client!.publishMessage(
+              "test/test", MqttQos.exactlyOnce, builder.payload!));
+
     } on Exception catch (e) {
       print('EXAMPLE::client exception - $e');
       disconnect();
@@ -95,7 +102,7 @@ class MQTTManager extends ChangeNotifier {
       message = "0";
     else
       message = "1";
-      print("value value: $value");
+    print("value value: $value");
     builder.addString(value == null ? message : value);
     _client!.publishMessage(_topic, MqttQos.exactlyOnce, builder.payload!);
     _client!.publishMessage("unifai/light/event/changestate",

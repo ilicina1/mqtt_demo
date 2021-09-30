@@ -1,4 +1,6 @@
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
 import 'package:porcupine/porcupine_error.dart';
 import 'package:porcupine/porcupine_manager.dart';
@@ -44,6 +46,8 @@ class SpeechToTextManager extends ChangeNotifier {
   void wakeWordCallback(int keywordIndex) {
     if (keywordIndex >= 0) {
       print("TRIGERED KEYWORD");
+      SystemSound.play(SystemSoundType.click);
+
       startListening();
     }
   }
