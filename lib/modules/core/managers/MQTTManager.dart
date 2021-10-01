@@ -14,6 +14,22 @@ class MQTTManager extends ChangeNotifier {
   String? _host;
   String _topic = "sonoff";
   bool isTurnedOn = false;
+  String temperatureValue = "";
+  int temperatureIntValue = 16;
+
+  void temperatureChange(int value) {
+    temperatureIntValue = value;
+
+    notifyListeners();
+  }
+
+  void confirmNewTemperature(int value) {
+    final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+    print(value);
+    builder.addString(value.toString());
+    _client!.publishMessage(
+        "unifai/temp/event/settemp", MqttQos.exactlyOnce, builder.payload!);
+  }
 
   void initializeMQTTClient({
     required String host,
@@ -40,7 +56,7 @@ class MQTTManager extends ChangeNotifier {
         .startClean() // Non persistent session for testing
         //.authenticateAs(username, password)// Non persistent session for testing
         .withWillQos(MqttQos.atLeastOnce);
-    print('EXAMPLE::Mosquitto client connecting....');
+    print('EXAMPLE::hivemq client connecting....');
     _client!.connectionMessage = connMess;
   }
 
@@ -50,12 +66,13 @@ class MQTTManager extends ChangeNotifier {
   void connect() async {
     assert(_client != null);
     try {
-      print('EXAMPLE::Mosquitto start client connecting....');
+      print('EXAMPLE::hivemq start client connecting....');
       _currentState.setAppConnectionState(MQTTAppConnectionState.connecting);
       updateState();
       await _client!.connect();
       _client!.subscribe("unifai/light/event/state", MqttQos.atLeastOnce);
-
+      // for temperature
+      _client!.subscribe("unifai/temp/event/value", MqttQos.atLeastOnce);
       // listen to unifai/light/event/state and changing state depending on message
       _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
         final recMess = c[0].payload as MqttPublishMessage;
@@ -63,9 +80,12 @@ class MQTTManager extends ChangeNotifier {
             MqttPublishPayload.bytesToStringAsString(recMess.payload.message!);
         if (payload == "1")
           isTurnedOn = true;
-        else
+        else if (payload == "0")
           isTurnedOn = false;
-        print('Received message:$payload  --');
+        else {
+          temperatureValue = payload;
+        }
+        print('Received message light:$payload  ${c[0].payload.header} --');
       });
 
       // on initialization send message to getstate and receive response
@@ -73,13 +93,16 @@ class MQTTManager extends ChangeNotifier {
       builder.addString("0");
       _client!.publishMessage(
           "unifai/light/event/getstate", MqttQos.exactlyOnce, builder.payload!);
+      builder.addString("0");
 
+      // get temperature
+      _client!.publishMessage(
+          "unifai/temp/event/gettemp", MqttQos.exactlyOnce, builder.payload!);
 
       new Timer.periodic(
           const Duration(minutes: 10),
           (Timer t) => _client!.publishMessage(
               "test/test", MqttQos.exactlyOnce, builder.payload!));
-
     } on Exception catch (e) {
       print('EXAMPLE::client exception - $e');
       disconnect();
@@ -108,9 +131,19 @@ class MQTTManager extends ChangeNotifier {
     _client!.publishMessage(_topic, MqttQos.exactlyOnce, builder.payload!);
     _client!.publishMessage("unifai/light/event/changestate",
         MqttQos.exactlyOnce, builder.payload!);
-    isTurnedOn = !isTurnedOn;
+    if (value == null) {
+      if (message == "0")
+        isTurnedOn = false;
+      else
+        isTurnedOn = true;
+    } else {
+      if (value == "0")
+        isTurnedOn = false;
+      else
+        isTurnedOn = true;
+    }
 
-    // notifyListeners();
+    notifyListeners();
   }
 
   void onUnsubscribed(String? topic) {
@@ -137,7 +170,7 @@ class MQTTManager extends ChangeNotifier {
   void onConnected() {
     _currentState.setAppConnectionState(MQTTAppConnectionState.connected);
     updateState();
-    print('EXAMPLE::Mosquitto client connected....');
+    print('EXAMPLE::hivemq client connected....');
     _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
       final MqttPublishMessage recMess = c[0].payload as MqttPublishMessage;
       final String pt =

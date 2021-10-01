@@ -1,10 +1,7 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
 import 'package:porcupine/porcupine_error.dart';
 import 'package:porcupine/porcupine_manager.dart';
-import 'package:provider/provider.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 
@@ -15,7 +12,8 @@ class SpeechToTextManager extends ChangeNotifier {
   PorcupineManager? _porcupineManager;
 
   void initSpeech() async {
-    speechEnabled = await speechToText.initialize();
+    speechEnabled =   await speechToText.initialize();
+    
     print("initialize speech recognition ${speechToText.isListening}");
     createPorcupineManager();
     // await speechToText.listen(onResult: onSpeechResult);
@@ -55,16 +53,22 @@ class SpeechToTextManager extends ChangeNotifier {
   void onSpeechResult(
     SpeechRecognitionResult result,
   ) {
+    print("lastwords2: ");
+
     lastWords = result.recognizedWords;
     print("lastwords: " + lastWords);
     notifyListeners();
   }
 
   void startListening() async {
-    await speechToText.listen(onResult: onSpeechResult);
+    try {
+      await speechToText.listen(onResult: onSpeechResult);
+    } catch (e) {
+      print("error listening speech to text: $e");
+    }
     print("lastwords1: ");
 
-    notifyListeners();
+    // notifyListeners();
   }
 
   /// Manually stop the active speech recognition session
