@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:porcupine/porcupine_error.dart';
@@ -12,19 +14,19 @@ class SpeechToTextManager extends ChangeNotifier {
   PorcupineManager? _porcupineManager;
 
   void initSpeech() async {
-    speechEnabled =   await speechToText.initialize();
-    
-    print("initialize speech recognition ${speechToText.isListening}");
     createPorcupineManager();
-    // await speechToText.listen(onResult: onSpeechResult);
+    speechEnabled = await speechToText.initialize(debugLogging: true);
+
+    print("initialize speech recognition ${speechEnabled}");
 
     notifyListeners();
   }
 
   void createPorcupineManager() async {
     try {
-      _porcupineManager =
-          await PorcupineManager.fromKeywords(["picovoice"], wakeWordCallback);
+      _porcupineManager = await PorcupineManager.fromKeywords(
+          ["picovoice"], wakeWordCallback,
+          sensitivities: [1]);
       await _startProcessing();
     } on PvError catch (err) {
       // handle porcupine init error
@@ -41,22 +43,24 @@ class SpeechToTextManager extends ChangeNotifier {
     }
   }
 
-  void wakeWordCallback(int keywordIndex) {
+  Future<void> wakeWordCallback(int keywordIndex) async {
     if (keywordIndex >= 0) {
       print("TRIGERED KEYWORD");
       SystemSound.play(SystemSoundType.click);
+      await _porcupineManager!.stop();
 
       startListening();
     }
   }
 
-  void onSpeechResult(
+  Future<void> onSpeechResult(
     SpeechRecognitionResult result,
-  ) {
+  ) async {
     print("lastwords2: ");
 
     lastWords = result.recognizedWords;
     print("lastwords: " + lastWords);
+
     notifyListeners();
   }
 
@@ -66,16 +70,22 @@ class SpeechToTextManager extends ChangeNotifier {
     } catch (e) {
       print("error listening speech to text: $e");
     }
+
     print("lastwords1: ");
 
-    // notifyListeners();
+    Timer(Duration(seconds: 3), () async {
+      await stopListening();
+      await _startProcessing();
+    });
+
+    notifyListeners();
   }
 
   /// Manually stop the active speech recognition session
   /// Note that there are also timeouts that each platform enforces
   /// and the SpeechToText plugin supports setting timeouts on the
   /// listen method.
-  void stopListening() async {
+  Future<void>  stopListening() async {
     await speechToText.stop();
     notifyListeners();
   }
