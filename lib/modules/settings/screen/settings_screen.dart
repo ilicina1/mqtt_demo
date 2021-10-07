@@ -112,22 +112,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 : null, //
           ),
         ),
-        // const SizedBox(width: 10),
-        // Expanded(
-        //   child: RaisedButton(
-        //     color: Color(0xffC1292E),
-        //     child: const Text(
-        //       'Disconnect',
-        //       style: TextStyle(
-        //         color: Colors.white,
-        //         fontFamily: "Poppins",
-        //       ),
-        //     ),
-        //     onPressed: state != MQTTAppConnectionState.disconnected
-        //         ? _disconnect
-        //         : null, //
-        //   ),
-        // ),
       ],
     );
   }

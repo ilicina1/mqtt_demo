@@ -2,12 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
 import 'package:fluttermqttnew/modules/core/managers/speechToTextManager.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
 import 'package:fluttermqttnew/modules/core/widgets/status_bar.dart';
 import 'package:fluttermqttnew/modules/helpers/screen_route.dart';
 import 'package:fluttermqttnew/modules/helpers/status_info_message_utils.dart';
+import 'package:fluttermqttnew/modules/settings/screen/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 
@@ -19,7 +21,8 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   late MQTTManager _manager;
   late SpeechToTextManager _speechManager;
-
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   @override
   void initState() {
     super.initState();
@@ -28,9 +31,24 @@ class _MessageScreenState extends State<MessageScreen> {
       _initializeSpeechRecognition();
       print("SchedulerBinding");
     });
+    var initializationSettingsAndroid =
+        AndroidInitializationSettings('app_icon');
+
+    var initSetttings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    flutterLocalNotificationsPlugin.initialize(initSetttings,
+        onSelectNotification: onSelectNotification);
     // _manager = Provider.of<MQTTManager>(context, listen: false);
     // _configureAndConnect();
   }
+
+  void onSelectNotification(String? payload) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+      return SettingsScreen();
+    }));
+  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +153,22 @@ class _MessageScreenState extends State<MessageScreen> {
                         )),
                       ),
                     ),
-                  )
+                  ),
+                  GestureDetector(
+                    onTap: () => _manager.showNotification(),
+                    child: Container(
+                      width: 90,
+                      color: Color(0xff01579B),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Center(
+                            child: Text(
+                          "Confirjbblbllblm",
+                          style: TextStyle(color: Colors.white),
+                        )),
+                      ),
+                    ),
+                  ),
                 ],
               ),
               Container(
@@ -149,7 +182,6 @@ class _MessageScreenState extends State<MessageScreen> {
           ),
         ),
       ),
-
     );
   }
 
@@ -190,4 +222,13 @@ class _MessageScreenState extends State<MessageScreen> {
   void _initializeSpeechRecognition() {
     _speechManager.initSpeech();
   }
+
+  // showNotification() async {
+  //   var android = new AndroidNotificationDetails(
+  //       'id', 'channel');
+  //   var platform = new NotificationDetails(android:android);
+  //   await flutterLocalNotificationsPlugin.show(
+  //       0, 'Unifai', 'Test test', platform,
+  //       payload: 'Welcome to the Unifai ');
+  // }
 }

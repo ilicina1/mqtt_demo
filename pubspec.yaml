@@ -34,7 +34,8 @@ dependencies:
   speech_to_text: ^5.1.1
   porcupine: ^1.9.14
   syncfusion_flutter_gauges: ^19.3.43
-
+  flutter_local_notifications: ^9.0.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

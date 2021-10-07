@@ -2,12 +2,15 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
+import 'package:fluttermqttnew/modules/settings/screen/settings_screen.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
 class MQTTManager extends ChangeNotifier {
   // Private instance of client
+
   MQTTAppState _currentState = MQTTAppState();
   MqttServerClient? _client;
   late String _identifier;
@@ -16,7 +19,8 @@ class MQTTManager extends ChangeNotifier {
   bool isTurnedOn = false;
   String temperatureValue = "";
   int temperatureIntValue = 16;
-
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   void temperatureChange(int value) {
     temperatureIntValue = value;
 
@@ -31,9 +35,18 @@ class MQTTManager extends ChangeNotifier {
         "unifai/temp/event/settemp", MqttQos.exactlyOnce, builder.payload!);
   }
 
+
   void initializeMQTTClient({
     required String host,
   }) {
+  var initializationSettingsAndroid =
+        AndroidInitializationSettings('app_icon');
+
+    var initSetttings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    flutterLocalNotificationsPlugin.initialize(initSetttings,
+        onSelectNotification: onSelectNotification);
     _host = host;
     var idRandom = generateRandomString(10);
     _client = MqttServerClient(_host!, idRandom);
@@ -60,6 +73,14 @@ class MQTTManager extends ChangeNotifier {
     _client!.connectionMessage = connMess;
   }
 
+  showNotification() async {
+    var android = new AndroidNotificationDetails('id', 'channel');
+    var platform = new NotificationDetails(android: android);
+    await flutterLocalNotificationsPlugin.show(
+        0, 'Unifai', 'Test test', platform,
+        payload: 'Welcome to the Unifai ');
+  }
+
   String? get host => _host;
   MQTTAppState get currentState => _currentState;
   // Connect to the host
@@ -73,6 +94,10 @@ class MQTTManager extends ChangeNotifier {
       _client!.subscribe("unifai/light/event/state", MqttQos.atLeastOnce);
       // for temperature
       _client!.subscribe("unifai/temp/event/value", MqttQos.atLeastOnce);
+
+      //for movement tracking
+      _client!
+          .subscribe("unifai/motion/event/sensorstate", MqttQos.atLeastOnce);
       // listen to unifai/light/event/state and changing state depending on message
       _client!.updates!.listen((List<MqttReceivedMessage<MqttMessage>> c) {
         final recMess = c[0].payload as MqttPublishMessage;
@@ -85,7 +110,12 @@ class MQTTManager extends ChangeNotifier {
         else {
           temperatureValue = payload;
         }
-        print('Received message light:$payload  ${c[0].payload.header} --');
+        if (recMess.payload.variableHeader!.topicName ==
+            "unifai/motion/event/sensorstate") {
+              showNotification();
+            }
+        print(
+            'Received message: $payload  ${c[0].payload.header} --- ${recMess.payload.variableHeader!.topicName}');
       });
 
       // on initialization send message to getstate and receive response
@@ -194,5 +224,12 @@ class MQTTManager extends ChangeNotifier {
     var r = Random();
     return String.fromCharCodes(
         List.generate(len, (index) => r.nextInt(33) + 89));
+  }
+
+  void onSelectNotification(String? payload) {
+    print("traallalaa");
+    // Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+    //   return SettingsScreen();
+    // }));
   }
 }
