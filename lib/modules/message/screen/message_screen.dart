@@ -21,8 +21,7 @@ class MessageScreen extends StatefulWidget {
 class _MessageScreenState extends State<MessageScreen> {
   late MQTTManager _manager;
   late SpeechToTextManager _speechManager;
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+
   @override
   void initState() {
     super.initState();
@@ -31,16 +30,8 @@ class _MessageScreenState extends State<MessageScreen> {
       _initializeSpeechRecognition();
       print("SchedulerBinding");
     });
-    var initializationSettingsAndroid =
-        AndroidInitializationSettings('app_icon');
-
-    var initSetttings =
-        InitializationSettings(android: initializationSettingsAndroid);
-
-    flutterLocalNotificationsPlugin.initialize(initSetttings,
-        onSelectNotification: onSelectNotification);
-    // _manager = Provider.of<MQTTManager>(context, listen: false);
-    // _configureAndConnect();
+   
+ 
   }
 
   void onSelectNotification(String? payload) {
@@ -154,21 +145,7 @@ class _MessageScreenState extends State<MessageScreen> {
                       ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () => _manager.showNotification(),
-                    child: Container(
-                      width: 90,
-                      color: Color(0xff01579B),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
-                            child: Text(
-                          "Confirjbblbllblm",
-                          style: TextStyle(color: Colors.white),
-                        )),
-                      ),
-                    ),
-                  ),
+               
                 ],
               ),
               Container(
@@ -214,7 +191,7 @@ class _MessageScreenState extends State<MessageScreen> {
   }
 
   void _configureAndConnect() {
-    _manager.initializeMQTTClient(host: "broker.hivemq.com");
+    _manager.initializeMQTTClient(host: "broker.hivemq.com", context: context);
 
     _manager.connect();
   }
@@ -223,12 +200,5 @@ class _MessageScreenState extends State<MessageScreen> {
     _speechManager.initSpeech();
   }
 
-  // showNotification() async {
-  //   var android = new AndroidNotificationDetails(
-  //       'id', 'channel');
-  //   var platform = new NotificationDetails(android:android);
-  //   await flutterLocalNotificationsPlugin.show(
-  //       0, 'Unifai', 'Test test', platform,
-  //       payload: 'Welcome to the Unifai ');
-  // }
+  
 }

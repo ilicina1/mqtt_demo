@@ -26,7 +26,7 @@ class SpeechToTextManager extends ChangeNotifier {
     try {
       _porcupineManager = await PorcupineManager.fromKeywords(
           ["picovoice"], wakeWordCallback,
-          sensitivities: [1]);
+          sensitivities: [0.9]);
       await _startProcessing();
     } on PvError catch (err) {
       // handle porcupine init error

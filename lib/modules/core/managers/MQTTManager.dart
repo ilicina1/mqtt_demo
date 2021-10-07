@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
+import 'package:fluttermqttnew/modules/message/screen/message_screen.dart';
 import 'package:fluttermqttnew/modules/settings/screen/settings_screen.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
@@ -19,8 +20,12 @@ class MQTTManager extends ChangeNotifier {
   bool isTurnedOn = false;
   String temperatureValue = "";
   int temperatureIntValue = 16;
-FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+  late BuildContext context;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+
+  bool sensorState = false;
+
   void temperatureChange(int value) {
     temperatureIntValue = value;
 
@@ -35,13 +40,10 @@ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
         "unifai/temp/event/settemp", MqttQos.exactlyOnce, builder.payload!);
   }
 
-
-  void initializeMQTTClient({
-    required String host,
-  }) {
-  var initializationSettingsAndroid =
+  void initializeMQTTClient({required String host, context}) {
+    var initializationSettingsAndroid =
         AndroidInitializationSettings('app_icon');
-
+    context = context;
     var initSetttings =
         InitializationSettings(android: initializationSettingsAndroid);
 
@@ -105,15 +107,19 @@ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
             MqttPublishPayload.bytesToStringAsString(recMess.payload.message!);
         if (payload == "1")
           isTurnedOn = true;
-        else if (payload == "0")
+        else if (payload == "0") {
           isTurnedOn = false;
-        else {
+          sensorState = false;
+        } else {
           temperatureValue = payload;
         }
         if (recMess.payload.variableHeader!.topicName ==
             "unifai/motion/event/sensorstate") {
-              showNotification();
-            }
+          if (!sensorState) {
+            showNotification();
+            sensorState = true;
+          }
+        }
         print(
             'Received message: $payload  ${c[0].payload.header} --- ${recMess.payload.variableHeader!.topicName}');
       });
@@ -228,8 +234,15 @@ FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
 
   void onSelectNotification(String? payload) {
     print("traallalaa");
+    openPage(context);
     // Navigator.of(context).push(MaterialPageRoute(builder: (_) {
     //   return SettingsScreen();
     // }));
+  }
+
+  void openPage(context) {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+      return MessageScreen();
+    }));
   }
 }

@@ -9,7 +9,6 @@ import 'modules/helpers/service_locator.dart';
 import 'modules/message/screen/message_screen.dart';
 import 'modules/settings/screen/settings_screen.dart';
 
-
 Future<void> main() async {
   setupLocator();
 
@@ -37,18 +36,18 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider.value(value: SpeechToTextManager()),
       ],
       child: MaterialApp(
-        
-          debugShowCheckedModeBanner: false,
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-          ),
-          initialRoute: '/',
-          routes: {
-            '/': (BuildContext context) => MessageScreen(),
-            SETTINGS_ROUTE: (BuildContext context) => SettingsScreen(),
-          }),
+        debugShowCheckedModeBanner: false,
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        initialRoute: '/',
+        routes: {
+          '/': (BuildContext context) => MessageScreen(),
+          SETTINGS_ROUTE: (BuildContext context) => SettingsScreen(),
+        },
+      ),
     );
   }
 }
