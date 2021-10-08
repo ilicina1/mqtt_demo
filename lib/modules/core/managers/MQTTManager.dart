@@ -3,9 +3,9 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
 import 'package:fluttermqttnew/modules/message/screen/message_screen.dart';
-import 'package:fluttermqttnew/modules/settings/screen/settings_screen.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 
@@ -23,6 +23,7 @@ class MQTTManager extends ChangeNotifier {
   late BuildContext context;
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  FlutterTts flutterTts = FlutterTts();
 
   bool sensorState = false;
 
@@ -32,10 +33,13 @@ class MQTTManager extends ChangeNotifier {
     notifyListeners();
   }
 
-  void confirmNewTemperature(int value) {
+  Future<void> confirmNewTemperature(int value) async {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     print(value);
     builder.addString(value.toString());
+    await flutterTts.setSpeechRate(0.5);
+
+    await flutterTts.speak("The temperature is set to $value degrees Celsius");
     _client!.publishMessage(
         "unifai/temp/event/settemp", MqttQos.exactlyOnce, builder.payload!);
   }
@@ -155,7 +159,7 @@ class MQTTManager extends ChangeNotifier {
     _client!.disconnect();
   }
 
-  void publish([value]) {
+  Future<void> publish([value]) async {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     String message = "";
     if (isTurnedOn)
@@ -168,15 +172,20 @@ class MQTTManager extends ChangeNotifier {
     _client!.publishMessage("unifai/light/event/changestate",
         MqttQos.exactlyOnce, builder.payload!);
     if (value == null) {
-      if (message == "0")
+      if (message == "0") {
         isTurnedOn = false;
-      else
+        await flutterTts.speak("The lights are off");
+      } else {
         isTurnedOn = true;
+        await flutterTts.speak("The lights are on");
+      }
     } else {
-      if (value == "0")
+      if (value == "0") {
         isTurnedOn = false;
-      else
+        await flutterTts.speak("The lights are off");
+      } else
         isTurnedOn = true;
+      await flutterTts.speak("The lights are on");
     }
 
     notifyListeners();
@@ -222,7 +231,6 @@ class MQTTManager extends ChangeNotifier {
   }
 
   void updateState() {
-    //controller.add(_currentState);
     notifyListeners();
   }
 
@@ -233,11 +241,7 @@ class MQTTManager extends ChangeNotifier {
   }
 
   void onSelectNotification(String? payload) {
-    print("traallalaa");
     openPage(context);
-    // Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-    //   return SettingsScreen();
-    // }));
   }
 
   void openPage(context) {

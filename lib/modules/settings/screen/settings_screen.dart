@@ -117,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _configureAndConnect() {
-    _manager.initializeMQTTClient(
+    _manager.initializeMQTTClient( 
         host: "broker.hivemq.com");
     _manager.connect();
   }

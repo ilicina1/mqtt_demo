@@ -35,6 +35,7 @@ dependencies:
   porcupine: ^1.9.14
   syncfusion_flutter_gauges: ^19.3.43
   flutter_local_notifications: ^9.0.0
+  flutter_tts: ^3.1.0
   
 dev_dependencies:
   flutter_test:

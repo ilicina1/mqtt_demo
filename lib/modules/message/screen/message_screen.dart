@@ -1,8 +1,5 @@
-// import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
 import 'package:fluttermqttnew/modules/core/managers/speechToTextManager.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
@@ -30,8 +27,6 @@ class _MessageScreenState extends State<MessageScreen> {
       _initializeSpeechRecognition();
       print("SchedulerBinding");
     });
-   
- 
   }
 
   void onSelectNotification(String? payload) {
@@ -39,7 +34,6 @@ class _MessageScreenState extends State<MessageScreen> {
       return SettingsScreen();
     }));
   }
-  
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +44,14 @@ class _MessageScreenState extends State<MessageScreen> {
       _manager.onVoiceCommand(_speechManager.lastWords);
       _speechManager.lastWords = "";
     }
+
+    bool isConnected = false;
+
+    if (_manager.currentState.getAppConnectionState ==
+        MQTTAppConnectionState.connected)
+      isConnected = true;
+    else
+      isConnected = false;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -86,77 +88,119 @@ class _MessageScreenState extends State<MessageScreen> {
         child: Container(
           alignment: Alignment.center,
           height: MediaQuery.of(context).size.height,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              StatusBar(
-                  statusMessage: prepareStateMessageFrom(
-                      _manager.currentState.getAppConnectionState)),
-              _buildSendButtonFrom(_manager.currentState.getAppConnectionState),
-
-              Column(
+          child: isConnected
+              ? ListView(
                 children: [
-                  SfRadialGauge(
-                    axes: <RadialAxis>[
-                      RadialAxis(
-                        minimum: 16,
-                        maximum: 31,
-                        pointers: <GaugePointer>[
-                          RangePointer(
-                            // value: double.parse(_manager.temperatureValue == ""
-                            //     ? "16"
-                            //     : _manager.temperatureValue),
-                            cornerStyle: CornerStyle.bothCurve,
-                            width: 15,
-                            sizeUnit: GaugeSizeUnit.logicalPixel,
-                          ),
-                          MarkerPointer(
-                              onValueChanged: (double value) {
-                                _manager.temperatureChange(value.toInt());
-                              },
-                              // value: double.parse(_manager.temperatureValue == ""
-                              //     ? "16"
-                              //     : _manager.temperatureValue),
-                              value: _manager.temperatureIntValue.toDouble(),
-                              enableDragging: true,
-                              markerHeight: 34,
-                              markerWidth: 34,
-                              markerType: MarkerType.circle,
-                              color: Color(0xff01579B),
-                              borderWidth: 2,
-                              borderColor: Colors.white54)
-                        ],
-                      )
-                    ],
-                  ),
-                  GestureDetector(
-                    onTap: () => _manager
-                        .confirmNewTemperature(_manager.temperatureIntValue),
-                    child: Container(
-                      width: 90,
-                      color: Color(0xff01579B),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Center(
+                  
+                  Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        StatusBar(
+                            statusMessage: prepareStateMessageFrom(
+                                _manager.currentState.getAppConnectionState)),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 50.0),
+                          child: _buildSendButtonFrom(
+                              _manager.currentState.getAppConnectionState),
+                        ),
+
+
+                        Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 20.0),
+                              child: SfRadialGauge(
+                                axes: <RadialAxis>[
+                                  RadialAxis(
+                                    minimum: 16,
+                                    maximum: 31,
+                                    pointers: <GaugePointer>[
+                                      RangePointer(
+                                        // value: double.parse(_manager.temperatureValue == ""
+                                        //     ? "16"
+                                        //     : _manager.temperatureValue),
+                                        cornerStyle: CornerStyle.bothCurve,
+                                        width: 15,
+                                        sizeUnit: GaugeSizeUnit.logicalPixel,
+                                      ),
+                                      MarkerPointer(
+                                          onValueChanged: (double value) {
+                                            _manager.temperatureChange(value.toInt());
+                                          },
+                                          // value: double.parse(_manager.temperatureValue == ""
+                                          //     ? "16"
+                                          //     : _manager.temperatureValue),
+                                          value:
+                                              _manager.temperatureIntValue.toDouble(),
+                                          enableDragging: true,
+                                          markerHeight: 34,
+                                          markerWidth: 34,
+                                          markerType: MarkerType.circle,
+                                          color: Color(0xff01579B),
+                                          borderWidth: 2,
+                                          borderColor: Colors.white54)
+                                    ],
+                                  )
+                                ],
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 30.0),
+                              child: GestureDetector(
+                                onTap: () => _manager.confirmNewTemperature(
+                                    _manager.temperatureIntValue),
+                                child: Container(
+                                  width: 90,
+                                  color: Color(0xff01579B),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Center(
+                                        child: Text(
+                                      "Confirm",
+                                      style: TextStyle(color: Colors.white),
+                                    )),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 20.0),
+                          child: Container(
                             child: Text(
-                          "Confirm",
-                          style: TextStyle(color: Colors.white),
-                        )),
-                      ),
+                                'Room temperature is: ${_manager.temperatureValue} '),
+                          ),
+                        ),
+                        // Container(
+                        //   child: Text(''),
+                        // ),
+                      ],
                     ),
-                  ),
-               
                 ],
-              ),
-              Container(
-                child:
-                    Text('Room temperature is: ${_manager.temperatureValue} '),
-              ),
-              // Container(
-              //   child: Text(''),
-              // ),
-            ],
-          ),
+              )
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    StatusBar(
+                        statusMessage: prepareStateMessageFrom(
+                            _manager.currentState.getAppConnectionState)),
+                    RaisedButton(
+                      color: Color(0xff01579B),
+                      child: const Text(
+                        'Connect',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontFamily: "Poppins",
+                        ),
+                      ),
+                      onPressed: _manager.currentState.getAppConnectionState == MQTTAppConnectionState.disconnected
+                          ? _configureAndConnect
+                          : null, //
+                    ),
+                    Container(),
+                  ],
+                ),
         ),
       ),
     );
@@ -194,11 +238,10 @@ class _MessageScreenState extends State<MessageScreen> {
     _manager.initializeMQTTClient(host: "broker.hivemq.com", context: context);
 
     _manager.connect();
+    print("ssssssss");
   }
 
   void _initializeSpeechRecognition() {
     _speechManager.initSpeech();
   }
-
-  
 }
