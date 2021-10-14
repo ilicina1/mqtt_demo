@@ -1,14 +1,15 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
 import 'package:fluttermqttnew/modules/core/managers/speechToTextManager.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
-import 'package:fluttermqttnew/modules/core/widgets/status_bar.dart';
 import 'package:fluttermqttnew/modules/helpers/screen_route.dart';
-import 'package:fluttermqttnew/modules/helpers/status_info_message_utils.dart';
 import 'package:fluttermqttnew/modules/settings/screen/settings_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:sliding_sheet/sliding_sheet.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:tuple/tuple.dart';
 
 class MessageScreen extends StatefulWidget {
   @override
@@ -56,56 +57,233 @@ class _MessageScreenState extends State<MessageScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-          title: const Text(
-            'Unifai',
-            style: TextStyle(
-              fontSize: 20,
-              fontFamily: "Poppins",
-              fontWeight: FontWeight.w600,
-              letterSpacing: 0.15,
-              color: Color(0xff01579B),
+        title: Image.asset(
+          "assets/images/unifai_logo.png",
+          width: 82,
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0.0,
+      ),
+      bottomNavigationBar: BottomAppBar(
+        child: Container(
+          height: 40,
+          color: Color(0xff0B0B45),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 20.0, right: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Voice commands enabled",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.settings, color: Colors.white),
+                  onPressed: () async {
+                    await showSlidingBottomSheet(
+                      context,
+                      resizeToAvoidBottomInset: false,
+                      useRootNavigator: true,
+                      builder: (context) {
+                        return SlidingSheetDialog(
+                          duration: const Duration(milliseconds: 400),
+                          elevation: 8,
+                          cornerRadius: 16,
+                          snapSpec: SnapSpec(
+                            snap: true,
+                            snappings: [0.5],
+                            positioning:
+                                SnapPositioning.relativeToAvailableSpace,
+                          ),
+                          builder: (context, state) {
+                            return SheetListenerBuilder(
+                              builder: (context, state) {
+                                return Material(
+                                  color: Colors.white,
+                                  child:
+                                      Selector<MQTTManager, Tuple2<bool, bool>>(
+                                    selector: (context, mqttMenager) => Tuple2(
+                                        mqttMenager.isVoiceCommandEnabled,
+                                        mqttMenager.isVoiceAssistantEnabled),
+                                    builder: (context, data, child) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 20.0,
+                                          right: 20,
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("Voice commands"),
+                                                // SizedBox(height: 100),
+                                                Transform.scale(
+                                                  scale: .7,
+                                                  child: CupertinoSwitch(
+                                                    trackColor: Colors
+                                                        .grey, // **INACTIVE STATE COLOR**
+                                                    activeColor: Color(
+                                                        0xff01579B), // **ACTIVE STATE COLOR**
+                                                    value: data.item1,
+                                                    onChanged: (bool value) {
+                                                      _manager
+                                                          .changeVoiceCommandState(
+                                                              value);
+                                                      if (value == false)
+                                                        _speechManager
+                                                            .stopProcessing();
+                                                      else
+                                                        _speechManager
+                                                            .startProcessing();
+                                                    },
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            Divider(),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text("Voice assistant"),
+                                                Transform.scale(
+                                                  scale: .7,
+                                                  child: CupertinoSwitch(
+                                                    trackColor: Colors
+                                                        .grey, // **INACTIVE STATE COLOR**
+                                                    activeColor: Color(
+                                                        0xff01579B), // **ACTIVE STATE COLOR**
+                                                    value: data.item2,
+                                                    onChanged: (bool value) {
+                                                      _manager
+                                                          .changeVoiceAssistantState(
+                                                              value);
+                                                    },
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                            Divider(),
+                                            Image.asset(
+                                              "assets/images/qr-code.png",
+                                              width: 200,
+                                              height: 200,
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
             ),
           ),
-          backgroundColor: Colors.white,
-          elevation: 0.0,
-          // manual connection
-          actions: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(right: 15.0),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushNamed(SETTINGS_ROUTE);
-                },
-                child: Icon(
-                  Icons.settings,
-                  color: Color(0xff01579B),
-                  size: 26.0,
-                ),
-              ),
-            )
-          ]),
-      body: SafeArea(
-        child: Container(
-          alignment: Alignment.center,
-          height: MediaQuery.of(context).size.height,
-          child: isConnected
-              ? ListView(
-                children: [
-                  
-                  Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        StatusBar(
-                            statusMessage: prepareStateMessageFrom(
-                                _manager.currentState.getAppConnectionState)),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 50.0),
+        ),
+      ),
+      body: Container(
+        alignment: Alignment.center,
+        child: isConnected
+            ? MediaQuery.of(context).orientation == Orientation.portrait
+                ? Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Container(
                           child: _buildSendButtonFrom(
                               _manager.currentState.getAppConnectionState),
                         ),
+                      ),
 
-
-                        Column(
+                      Expanded(
+                        child: Container(
+                          color: Color(0xff01579B).withOpacity(0.5),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(top: 20.0),
+                                child: SfRadialGauge(
+                                  axes: <RadialAxis>[
+                                    RadialAxis(
+                                      minimum: 16,
+                                      maximum: 31,
+                                      annotations: <GaugeAnnotation>[
+                                        GaugeAnnotation(
+                                            widget: Container(
+                                                child: Text(
+                                                    '${_manager.temperatureValue}°C',
+                                                    style: TextStyle(
+                                                        fontSize: 25,
+                                                        fontWeight:
+                                                            FontWeight.bold))),
+                                            angle: 90,
+                                            positionFactor: 0)
+                                      ],
+                                      pointers: <GaugePointer>[
+                                        RangePointer(
+                                          // value: double.parse(_manager.temperatureValue == ""
+                                          //     ? "16"
+                                          //     : _manager.temperatureValue),
+                                          cornerStyle: CornerStyle.bothCurve,
+                                          width: 15,
+                                          sizeUnit: GaugeSizeUnit.logicalPixel,
+                                        ),
+                                        MarkerPointer(
+                                            onValueChanged: (double value) {
+                                              _manager.temperatureChange(
+                                                  value.toInt());
+                                              _manager.confirmNewTemperature(
+                                                  _manager.temperatureIntValue);
+                                            },
+                                            // value: double.parse(_manager.temperatureValue == ""
+                                            //     ? "16"
+                                            //     : _manager.temperatureValue),
+                                            value: _manager.temperatureIntValue
+                                                .toDouble(),
+                                            enableDragging: true,
+                                            markerHeight: 34,
+                                            markerWidth: 34,
+                                            markerType: MarkerType.circle,
+                                            color: Color(0xff01579B),
+                                            borderWidth: 2,
+                                            borderColor: Colors.white54),
+                                      ],
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          child: _buildSendButtonFrom(
+                              _manager.currentState.getAppConnectionState),
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(top: 20.0),
@@ -114,6 +292,18 @@ class _MessageScreenState extends State<MessageScreen> {
                                   RadialAxis(
                                     minimum: 16,
                                     maximum: 31,
+                                    annotations: <GaugeAnnotation>[
+                                      GaugeAnnotation(
+                                          widget: Container(
+                                              child: Text(
+                                                  '${_manager.temperatureValue}°C',
+                                                  style: TextStyle(
+                                                      fontSize: 25,
+                                                      fontWeight:
+                                                          FontWeight.bold))),
+                                          angle: 90,
+                                          positionFactor: 0)
+                                    ],
                                     pointers: <GaugePointer>[
                                       RangePointer(
                                         // value: double.parse(_manager.temperatureValue == ""
@@ -125,83 +315,53 @@ class _MessageScreenState extends State<MessageScreen> {
                                       ),
                                       MarkerPointer(
                                           onValueChanged: (double value) {
-                                            _manager.temperatureChange(value.toInt());
+                                            _manager.temperatureChange(
+                                                value.toInt());
+                                            _manager.confirmNewTemperature(
+                                                _manager.temperatureIntValue);
                                           },
                                           // value: double.parse(_manager.temperatureValue == ""
                                           //     ? "16"
                                           //     : _manager.temperatureValue),
-                                          value:
-                                              _manager.temperatureIntValue.toDouble(),
+                                          value: _manager.temperatureIntValue
+                                              .toDouble(),
                                           enableDragging: true,
                                           markerHeight: 34,
                                           markerWidth: 34,
                                           markerType: MarkerType.circle,
                                           color: Color(0xff01579B),
                                           borderWidth: 2,
-                                          borderColor: Colors.white54)
+                                          borderColor: Colors.white54),
                                     ],
                                   )
                                 ],
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 30.0),
-                              child: GestureDetector(
-                                onTap: () => _manager.confirmNewTemperature(
-                                    _manager.temperatureIntValue),
-                                child: Container(
-                                  width: 90,
-                                  color: Color(0xff01579B),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Center(
-                                        child: Text(
-                                      "Confirm",
-                                      style: TextStyle(color: Colors.white),
-                                    )),
-                                  ),
-                                ),
-                              ),
-                            ),
                           ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 20.0),
-                          child: Container(
-                            child: Text(
-                                'Room temperature is: ${_manager.temperatureValue} '),
-                          ),
-                        ),
-                        // Container(
-                        //   child: Text(''),
-                        // ),
-                      ],
-                    ),
-                ],
-              )
-              : Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    StatusBar(
-                        statusMessage: prepareStateMessageFrom(
-                            _manager.currentState.getAppConnectionState)),
-                    RaisedButton(
-                      color: Color(0xff01579B),
-                      child: const Text(
-                        'Connect',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: "Poppins",
-                        ),
                       ),
-                      onPressed: _manager.currentState.getAppConnectionState == MQTTAppConnectionState.disconnected
-                          ? _configureAndConnect
-                          : null, //
+                    ],
+                  )
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  RaisedButton(
+                    color: Color(0xff01579B),
+                    child: const Text(
+                      'Connect',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontFamily: "Poppins",
+                      ),
                     ),
-                    Container(),
-                  ],
-                ),
-        ),
+                    onPressed: _manager.currentState.getAppConnectionState ==
+                            MQTTAppConnectionState.disconnected
+                        ? _configureAndConnect
+                        : null, //
+                  ),
+                  Container(),
+                ],
+              ),
       ),
     );
   }
@@ -210,19 +370,17 @@ class _MessageScreenState extends State<MessageScreen> {
     return Selector<MQTTManager, bool>(
       selector: (context, mqttMenager) => mqttMenager.isTurnedOn,
       builder: (context, isTurnedOn, child) {
-        return InkWell(
-          borderRadius: BorderRadius.circular(40),
-          onTap: () => _publishMessage(),
-          child: Container(
-            height: 60,
-            width: 60,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(40),
-              color: isTurnedOn ? Color(0xffC1292E) : Color(0xff01579B),
-            ),
-            child: Icon(
-              Icons.power_settings_new,
-              color: Colors.white,
+        return Padding(
+          padding: const EdgeInsets.all(100.0),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(40),
+            onTap: () => _publishMessage(),
+            child: Container(
+              child: Image.asset(
+                isTurnedOn
+                    ? "assets/images/light_on.png"
+                    : "assets/images/light_off.png",
+              ),
             ),
           ),
         );

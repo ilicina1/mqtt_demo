@@ -12,6 +12,7 @@ class SpeechToTextManager extends ChangeNotifier {
   bool speechEnabled = false;
   String lastWords = '';
   PorcupineManager? _porcupineManager;
+  
 
   void initSpeech() async {
     createPorcupineManager();
@@ -27,17 +28,25 @@ class SpeechToTextManager extends ChangeNotifier {
       _porcupineManager = await PorcupineManager.fromKeywords(
           ["picovoice"], wakeWordCallback,
           sensitivities: [0.9]);
-      await _startProcessing();
+      await startProcessing();
     } on PvError catch (err) {
       // handle porcupine init error
       print("Porcupine error!! $err");
     }
   }
 
-  Future<void> _startProcessing() async {
+  Future<void> startProcessing() async {
     try {
       await _porcupineManager?.start();
       print("WORKING");
+    } on PvAudioException catch (ex) {
+      print("Failed to start audio capture: ${ex.message}");
+    }
+  }
+  Future<void> stopProcessing() async {
+    try {
+      await _porcupineManager?.stop();
+      print("STOPED PORCUPINE");
     } on PvAudioException catch (ex) {
       print("Failed to start audio capture: ${ex.message}");
     }
@@ -75,7 +84,7 @@ class SpeechToTextManager extends ChangeNotifier {
 
     Timer(Duration(seconds: 3), () async {
       await stopListening();
-      await _startProcessing();
+      await startProcessing();
     });
 
     notifyListeners();

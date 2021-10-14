@@ -11,7 +11,7 @@ import 'modules/settings/screen/settings_screen.dart';
 Future<void> main() async {
   setupLocator();
 
-  // await NotificationService().init(); // <----
+  // await NotificationService().init(); // <----9
 
   SystemChrome.setSystemUIOverlayStyle(
     SystemUiOverlayStyle(
@@ -38,6 +38,7 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'Flutter Demo',
         theme: ThemeData(
+          fontFamily: "Poppins",
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
