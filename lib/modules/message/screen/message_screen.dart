@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:fluttermqttnew/modules/core/managers/MQTTManager.dart';
 import 'package:fluttermqttnew/modules/core/managers/speechToTextManager.dart';
 import 'package:fluttermqttnew/modules/core/models/MQTTAppState.dart';
-import 'package:fluttermqttnew/modules/helpers/screen_route.dart';
 import 'package:fluttermqttnew/modules/settings/screen/settings_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_sheet/sliding_sheet.dart';
@@ -80,9 +80,14 @@ class _MessageScreenState extends State<MessageScreen> {
                     color: Colors.white,
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.settings, color: Colors.white),
-                  onPressed: () async {
+                GestureDetector(
+                  child: SvgPicture.asset(
+                    "assets/images/options.svg",
+                    color: Colors.white,
+                    width: 24,
+                    height: 24,
+                  ),
+                  onTap: () async {
                     await showSlidingBottomSheet(
                       context,
                       resizeToAvoidBottomInset: false,
@@ -94,7 +99,7 @@ class _MessageScreenState extends State<MessageScreen> {
                           cornerRadius: 16,
                           snapSpec: SnapSpec(
                             snap: true,
-                            snappings: [0.5],
+                            snappings: [0.7],
                             positioning:
                                 SnapPositioning.relativeToAvailableSpace,
                           ),
@@ -132,6 +137,7 @@ class _MessageScreenState extends State<MessageScreen> {
                                                         0xff01579B), // **ACTIVE STATE COLOR**
                                                     value: data.item1,
                                                     onChanged: (bool value) {
+                                                      print("value");
                                                       _manager
                                                           .changeVoiceCommandState(
                                                               value);
@@ -208,10 +214,74 @@ class _MessageScreenState extends State<MessageScreen> {
                               _manager.currentState.getAppConnectionState),
                         ),
                       ),
-
                       Expanded(
                         child: Container(
-                          color: Color(0xff01579B).withOpacity(0.5),
+                          color: Color(0xff65AFFF).withOpacity(0.2),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 20.0),
+                            child: SfRadialGauge(
+                              axes: <RadialAxis>[
+                                RadialAxis(
+                                  minimum: 16,
+                                  maximum: 31,
+                                  annotations: <GaugeAnnotation>[
+                                    GaugeAnnotation(
+                                        widget: Container(
+                                          child: Text(
+                                            '${_manager.temperatureValue}°C',
+                                            style: TextStyle(
+                                              fontSize: 25,
+                                              fontWeight: FontWeight.bold,
+                                              color: Color(0xff0B0B45),
+                                              fontFamily: "Poppins",
+                                            ),
+                                          ),
+                                        ),
+                                        angle: 90,
+                                        positionFactor: 0)
+                                  ],
+                                  pointers: <GaugePointer>[
+                                    RangePointer(
+                                      cornerStyle: CornerStyle.bothCurve,
+                                      width: 15,
+                                      sizeUnit: GaugeSizeUnit.logicalPixel,
+                                    ),
+                                    MarkerPointer(
+                                        onValueChanged: (double value) {
+                                          _manager
+                                              .temperatureChange(value.toInt());
+                                          _manager.confirmNewTemperature(
+                                              _manager.temperatureIntValue);
+                                        },
+                                        value: _manager.temperatureIntValue
+                                            .toDouble(),
+                                        enableDragging: true,
+                                        markerHeight: 34,
+                                        markerWidth: 34,
+                                        markerType: MarkerType.circle,
+                                        color: Color(0xff01579B),
+                                        borderWidth: 2,
+                                        borderColor: Colors.white54),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: Container(
+                          child: _buildSendButtonFrom(
+                              _manager.currentState.getAppConnectionState),
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
+                          color: Color(0xff65AFFF).withOpacity(0.2),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -236,9 +306,6 @@ class _MessageScreenState extends State<MessageScreen> {
                                       ],
                                       pointers: <GaugePointer>[
                                         RangePointer(
-                                          // value: double.parse(_manager.temperatureValue == ""
-                                          //     ? "16"
-                                          //     : _manager.temperatureValue),
                                           cornerStyle: CornerStyle.bothCurve,
                                           width: 15,
                                           sizeUnit: GaugeSizeUnit.logicalPixel,
@@ -250,9 +317,6 @@ class _MessageScreenState extends State<MessageScreen> {
                                               _manager.confirmNewTemperature(
                                                   _manager.temperatureIntValue);
                                             },
-                                            // value: double.parse(_manager.temperatureValue == ""
-                                            //     ? "16"
-                                            //     : _manager.temperatureValue),
                                             value: _manager.temperatureIntValue
                                                 .toDouble(),
                                             enableDragging: true,
@@ -273,82 +337,26 @@ class _MessageScreenState extends State<MessageScreen> {
                       ),
                     ],
                   )
-                : Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          child: _buildSendButtonFrom(
-                              _manager.currentState.getAppConnectionState),
-                        ),
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 20.0),
-                              child: SfRadialGauge(
-                                axes: <RadialAxis>[
-                                  RadialAxis(
-                                    minimum: 16,
-                                    maximum: 31,
-                                    annotations: <GaugeAnnotation>[
-                                      GaugeAnnotation(
-                                          widget: Container(
-                                              child: Text(
-                                                  '${_manager.temperatureValue}°C',
-                                                  style: TextStyle(
-                                                      fontSize: 25,
-                                                      fontWeight:
-                                                          FontWeight.bold))),
-                                          angle: 90,
-                                          positionFactor: 0)
-                                    ],
-                                    pointers: <GaugePointer>[
-                                      RangePointer(
-                                        // value: double.parse(_manager.temperatureValue == ""
-                                        //     ? "16"
-                                        //     : _manager.temperatureValue),
-                                        cornerStyle: CornerStyle.bothCurve,
-                                        width: 15,
-                                        sizeUnit: GaugeSizeUnit.logicalPixel,
-                                      ),
-                                      MarkerPointer(
-                                          onValueChanged: (double value) {
-                                            _manager.temperatureChange(
-                                                value.toInt());
-                                            _manager.confirmNewTemperature(
-                                                _manager.temperatureIntValue);
-                                          },
-                                          // value: double.parse(_manager.temperatureValue == ""
-                                          //     ? "16"
-                                          //     : _manager.temperatureValue),
-                                          value: _manager.temperatureIntValue
-                                              .toDouble(),
-                                          enableDragging: true,
-                                          markerHeight: 34,
-                                          markerWidth: 34,
-                                          markerType: MarkerType.circle,
-                                          color: Color(0xff01579B),
-                                          borderWidth: 2,
-                                          borderColor: Colors.white54),
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  )
             : Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                    child: Text(
+                      "Lost connection to broker, please reconnect",
+                      style: TextStyle(
+                        color: Color(0xff0B0B45),
+                        fontFamily: "Poppins",
+                        fontSize: 24,
+                      ),
+                      textAlign:TextAlign.center,
+                    ),
+
+                  ),
                   RaisedButton(
                     color: Color(0xff01579B),
                     child: const Text(
-                      'Connect',
+                      'Reconnect',
                       style: TextStyle(
                         color: Colors.white,
                         fontFamily: "Poppins",
@@ -371,7 +379,7 @@ class _MessageScreenState extends State<MessageScreen> {
       selector: (context, mqttMenager) => mqttMenager.isTurnedOn,
       builder: (context, isTurnedOn, child) {
         return Padding(
-          padding: const EdgeInsets.all(100.0),
+          padding: const EdgeInsets.all(50.0),
           child: InkWell(
             borderRadius: BorderRadius.circular(40),
             onTap: () => _publishMessage(),

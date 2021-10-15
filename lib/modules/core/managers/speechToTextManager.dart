@@ -15,15 +15,14 @@ class SpeechToTextManager extends ChangeNotifier {
   
 
   void initSpeech() async {
-    createPorcupineManager();
+    await createPorcupineManager();
     speechEnabled = await speechToText.initialize(debugLogging: true);
-
     print("initialize speech recognition ${speechEnabled}");
 
     notifyListeners();
   }
 
-  void createPorcupineManager() async {
+  Future<void> createPorcupineManager() async {
     try {
       _porcupineManager = await PorcupineManager.fromKeywords(
           ["picovoice"], wakeWordCallback,
